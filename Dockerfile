@@ -11,3 +11,4 @@ COPY src/ ./src/
 USER node
 
 CMD ["npm", "start"]
+
