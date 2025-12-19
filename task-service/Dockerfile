@@ -2,12 +2,12 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package.json ./
+COPY package*.json ./
 
-RUN npm install --production
+RUN npm ci --only=production
 
 COPY src/ ./src/
 
-USER node
+EXPOSE 3002
 
-CMD ["npm", "start"]
+CMD ["node", "src/server.js"]
