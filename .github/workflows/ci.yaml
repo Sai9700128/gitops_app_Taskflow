@@ -188,7 +188,7 @@ jobs:
           ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
         run: |
           git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository_owner }}/gitops-config.git
-          cd gitops-config/charts/front-end
+          cd gitops-config/charts/frontend
 
           sed -i "s|repository:.*|repository: ${ECR_REGISTRY}/taskflow-frontend|g" values.yaml
           sed -i "s|tag:.*|tag: ${{ env.IMAGE_TAG }}|g" values.yaml
