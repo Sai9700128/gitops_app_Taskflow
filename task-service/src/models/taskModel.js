@@ -1,4 +1,4 @@
-const { pool } = require('../config/db');
+const { getPool } = require('../config/db');
 
 const Task = {
   // Create tasks table if not exists
@@ -17,14 +17,14 @@ const Task = {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `;
-    await pool.query(createTableQuery);
+    await getPool().query(createTableQuery);
     console.log('✅ Tasks table ready');
   },
 
   // Create new task
   async create(taskData) {
     const { title, description, status, priority, assignee_id, created_by, due_date } = taskData;
-    const [result] = await pool.query(
+    const [result] = await getPool().query(
       `INSERT INTO tasks (title, description, status, priority, assignee_id, created_by, due_date) 
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [title, description, status || 'todo', priority || 'medium', assignee_id, created_by, due_date]
@@ -34,7 +34,7 @@ const Task = {
 
   // Find task by ID
   async findById(id) {
-    const [rows] = await pool.query('SELECT * FROM tasks WHERE id = ?', [id]);
+    const [rows] = await getPool().query('SELECT * FROM tasks WHERE id = ?', [id]);
     return rows[0];
   },
 
@@ -65,13 +65,13 @@ const Task = {
 
     query += ' ORDER BY created_at DESC';
 
-    const [rows] = await pool.query(query, params);
+    const [rows] = await getPool().query(query, params);
     return rows;
   },
 
   // Get tasks by assignee
   async findByAssignee(assigneeId) {
-    const [rows] = await pool.query(
+    const [rows] = await getPool().query(
       'SELECT * FROM tasks WHERE assignee_id = ? ORDER BY created_at DESC',
       [assigneeId]
     );
@@ -81,11 +81,11 @@ const Task = {
   // Update task
   async update(id, taskData) {
     const { title, description, status, priority, assignee_id, due_date } = taskData;
-    
+
     const task = await this.findById(id);
     if (!task) return null;
 
-    const [result] = await pool.query(
+    const [result] = await getPool().query(
       `UPDATE tasks 
        SET title = ?, description = ?, status = ?, priority = ?, assignee_id = ?, due_date = ?
        WHERE id = ?`,
@@ -105,7 +105,7 @@ const Task = {
 
   // Delete task
   async delete(id) {
-    const [result] = await pool.query('DELETE FROM tasks WHERE id = ?', [id]);
+    const [result] = await getPool().query('DELETE FROM tasks WHERE id = ?', [id]);
     return result.affectedRows > 0;
   },
 
@@ -120,14 +120,14 @@ const Task = {
         SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done
       FROM tasks
     `;
-    
+
     const params = [];
     if (userId) {
       query += ' WHERE assignee_id = ? OR created_by = ?';
       params.push(userId, userId);
     }
 
-    const [rows] = await pool.query(query, params);
+    const [rows] = await getPool().query(query, params);
     return rows[0];
   }
 };

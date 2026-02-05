@@ -1,4 +1,4 @@
-const { pool } = require('../config/db');
+const { getPool } = require('../config/db');
 
 const User = {
   // Create users table if not exists
@@ -14,14 +14,14 @@ const User = {
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
       )
     `;
-    await pool.query(createTableQuery);
+    await getPool().query(createTableQuery);
     console.log('✅ Users table ready');
   },
 
   // Create new user
   async create(userData) {
     const { name, email, password, role = 'member' } = userData;
-    const [result] = await pool.query(
+    const [result] = await getPool().query(
       'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
       [name, email, password, role]
     );
@@ -30,13 +30,13 @@ const User = {
 
   // Find user by email
   async findByEmail(email) {
-    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await getPool().query('SELECT * FROM users WHERE email = ?', [email]);
     return rows[0];
   },
 
   // Find user by ID
   async findById(id) {
-    const [rows] = await pool.query(
+    const [rows] = await getPool().query(
       'SELECT id, name, email, role, created_at FROM users WHERE id = ?',
       [id]
     );
@@ -45,7 +45,7 @@ const User = {
 
   // Get all users
   async findAll() {
-    const [rows] = await pool.query(
+    const [rows] = await getPool().query(
       'SELECT id, name, email, role, created_at FROM users'
     );
     return rows;
@@ -54,7 +54,7 @@ const User = {
   // Update user
   async update(id, userData) {
     const { name, email, role } = userData;
-    const [result] = await pool.query(
+    const [result] = await getPool().query(
       'UPDATE users SET name = ?, email = ?, role = ? WHERE id = ?',
       [name, email, role, id]
     );
@@ -63,7 +63,7 @@ const User = {
 
   // Delete user
   async delete(id) {
-    const [result] = await pool.query('DELETE FROM users WHERE id = ?', [id]);
+    const [result] = await getPool().query('DELETE FROM users WHERE id = ?', [id]);
     return result.affectedRows > 0;
   }
 };
