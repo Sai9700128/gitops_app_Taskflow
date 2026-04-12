@@ -1,19 +1,27 @@
 const fs = require('fs');
 
-// Load secrets from Vault (must be FIRST, before dotenv)
+// Load secrets from Vault (must be FIRST, before anything else)
 const loadVaultSecrets = () => {
   const secretsPath = '/vault/secrets/config';
-  if (fs.existsSync(secretsPath)) {
-    const secrets = fs.readFileSync(secretsPath, 'utf8');
-    secrets.split('\n').forEach(line => {
-      const [key, value] = line.split('=');
-      if (key && value) {
-        process.env[key.trim()] = value.trim();
-      }
-    });
-    console.log('✅ Loaded secrets from Vault');
-  } else {
-    console.log('⚠️ Vault secrets not found, using environment variables');
+  try {
+    if (fs.existsSync(secretsPath)) {
+      const secrets = fs.readFileSync(secretsPath, 'utf8');
+      secrets.split('\n').forEach(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine && trimmedLine.includes('=')) {
+          const [key, ...valueParts] = trimmedLine.split('=');
+          const value = valueParts.join('='); // Handle values with = in them
+          if (key && value) {
+            process.env[key.trim()] = value.trim();
+          }
+        }
+      });
+      console.log('✅ Loaded secrets from Vault');
+    } else {
+      console.log('⚠️ Vault secrets not found, using environment variables');
+    }
+  } catch (error) {
+    console.error('❌ Error loading Vault secrets:', error.message);
   }
 };
 
