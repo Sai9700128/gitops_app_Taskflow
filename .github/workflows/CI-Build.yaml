@@ -1,0 +1,106 @@
+name: CI Build
+
+on:
+  push:
+    branches: [main]
+
+env:
+  AWS_REGION: us-east-1
+  IMAGE_TAG: ${{ github.sha }}
+
+jobs:
+  # Job 1: Detect which services changed
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      has_changes: ${{ steps.set-matrix.outputs.has_changes }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Detect changed services
+        id: set-matrix
+        run: |
+          CHANGED=$(git diff --name-only HEAD~1 | grep '/' | cut -d'/' -f1 | sort -u)
+
+          SERVICES=()
+          for dir in $CHANGED; do
+            if [ -f "$dir/Dockerfile" ]; then
+              SERVICES+=("$dir")
+            fi
+          done
+
+          if [ ${#SERVICES[@]} -eq 0 ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "matrix=[]" >> $GITHUB_OUTPUT
+          else
+            JSON=$(printf '%s\n' "${SERVICES[@]}" | jq -R . | jq -s -c .)
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "matrix=$JSON" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Changed services: ${SERVICES[*]}"
+
+  # Job 2: Build Docker image, push to ECR & update GitOps repo
+  build-and-push:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.has_changes == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Create ECR repository if not exists
+        run: |
+          aws ecr describe-repositories --repository-names taskflow-${{ matrix.service }} 2>/dev/null || \
+          aws ecr create-repository --repository-name taskflow-${{ matrix.service }}
+
+      - name: Build, tag, and push image
+        env:
+          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+          ECR_REPOSITORY: taskflow-${{ matrix.service }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./${{ matrix.service }}
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "✅ Pushed: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+
+      - name: Update GitOps repo
+        env:
+          ECR_REGISTRY: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+        run: |
+          git clone https://x-access-token:${{ secrets.GH_PAT }}@github.com/${{ github.repository_owner }}/gitops-config.git
+          cd gitops-config/helm/${{ matrix.service }}
+
+          sed -i "s|repository:.*|repository: ${ECR_REGISTRY}/taskflow-${{ matrix.service }}|g" values.yaml
+          sed -i "s|tag:.*|tag: ${{ env.IMAGE_TAG }}|g" values.yaml
+
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git diff --staged --quiet || {
+            git commit -m "Update ${{ matrix.service }} image to ${{ env.IMAGE_TAG }}"
+            for i in 1 2 3; do
+              git push && break
+              git pull --rebase
+              sleep $((i * 2))
+            done
+          }
+
+          echo "✅ Updated ${{ matrix.service }} values.yaml"

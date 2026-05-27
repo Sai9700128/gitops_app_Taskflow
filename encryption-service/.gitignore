@@ -1,0 +1,19 @@
+# Rust
+target/
+
+# Node.js
+node_modules/
+
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# Java
+target/
+*.class
+.mvn/
+*.jar
+
+# OS
+.DS_Store
