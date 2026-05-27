@@ -1,4 +1,4 @@
-use actix_web::{web, App, HttpServer, HttpResponse, get};
+use actix_web::{App, HttpServer, HttpResponse, get};
 use serde_json::json;
 
 #[get("/health")]
