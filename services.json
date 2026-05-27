@@ -1,0 +1,239 @@
+{
+  "services": [
+    {
+      "name": "sso-service",
+      "language": "go",
+      "port": 8081
+    },
+    {
+      "name": "session-service",
+      "language": "go",
+      "port": 8082
+    },
+    {
+      "name": "rbac-service",
+      "language": "go",
+      "port": 8083
+    },
+    {
+      "name": "api-gateway-service",
+      "language": "go",
+      "port": 8084
+    },
+    {
+      "name": "rate-limiter-service",
+      "language": "go",
+      "port": 8085
+    },
+    {
+      "name": "config-service",
+      "language": "go",
+      "port": 8086
+    },
+    {
+      "name": "cache-service",
+      "language": "go",
+      "port": 8087
+    },
+    {
+      "name": "scheduler-service",
+      "language": "go",
+      "port": 8088
+    },
+    {
+      "name": "health-aggregator",
+      "language": "go",
+      "port": 8089
+    },
+    {
+      "name": "metric-collector",
+      "language": "go",
+      "port": 8090
+    },
+    {
+      "name": "audit-log-service",
+      "language": "go",
+      "port": 8091
+    },
+    {
+      "name": "event-bus-service",
+      "language": "go",
+      "port": 8092
+    },
+    {
+      "name": "feature-flag-service",
+      "language": "go",
+      "port": 8093
+    },
+    {
+      "name": "service-registry",
+      "language": "go",
+      "port": 8094
+    },
+    {
+      "name": "idempotency-service",
+      "language": "go",
+      "port": 8095
+    },
+    {
+      "name": "circuit-breaker-service",
+      "language": "go",
+      "port": 8096
+    },
+    {
+      "name": "request-validator",
+      "language": "go",
+      "port": 8097
+    },
+    {
+      "name": "token-service",
+      "language": "go",
+      "port": 8098
+    },
+    {
+      "name": "webhook-service",
+      "language": "go",
+      "port": 8099
+    },
+    {
+      "name": "queue-processor",
+      "language": "go",
+      "port": 8100
+    },
+    {
+      "name": "email-service",
+      "language": "python",
+      "port": 8101
+    },
+    {
+      "name": "analytics-service",
+      "language": "python",
+      "port": 8102
+    },
+    {
+      "name": "reporting-service",
+      "language": "python",
+      "port": 8103
+    },
+    {
+      "name": "search-service",
+      "language": "python",
+      "port": 8104
+    },
+    {
+      "name": "recommendation-service",
+      "language": "python",
+      "port": 8105
+    },
+    {
+      "name": "ml-inference-service",
+      "language": "python",
+      "port": 8106
+    },
+    {
+      "name": "data-pipeline-service",
+      "language": "python",
+      "port": 8107
+    },
+    {
+      "name": "sentiment-service",
+      "language": "python",
+      "port": 8108
+    },
+    {
+      "name": "export-service",
+      "language": "python",
+      "port": 8109
+    },
+    {
+      "name": "geo-service",
+      "language": "python",
+      "port": 8110
+    },
+    {
+      "name": "notification-service",
+      "language": "node",
+      "port": 8111
+    },
+    {
+      "name": "chat-service",
+      "language": "node",
+      "port": 8112
+    },
+    {
+      "name": "file-upload-service",
+      "language": "node",
+      "port": 8113
+    },
+    {
+      "name": "template-service",
+      "language": "node",
+      "port": 8114
+    },
+    {
+      "name": "comment-service",
+      "language": "node",
+      "port": 8115
+    },
+    {
+      "name": "activity-feed-service",
+      "language": "node",
+      "port": 8116
+    },
+    {
+      "name": "realtime-service",
+      "language": "node",
+      "port": 8117
+    },
+    {
+      "name": "markdown-service",
+      "language": "node",
+      "port": 8118
+    },
+    {
+      "name": "localization-service",
+      "language": "node",
+      "port": 8119
+    },
+    {
+      "name": "payment-service",
+      "language": "java",
+      "port": 8120
+    },
+    {
+      "name": "invoice-service",
+      "language": "java",
+      "port": 8121
+    },
+    {
+      "name": "subscription-service",
+      "language": "java",
+      "port": 8122
+    },
+    {
+      "name": "billing-service",
+      "language": "java",
+      "port": 8123
+    },
+    {
+      "name": "compliance-service",
+      "language": "java",
+      "port": 8124
+    },
+    {
+      "name": "encryption-service",
+      "language": "rust",
+      "port": 8125
+    },
+    {
+      "name": "image-processor",
+      "language": "rust",
+      "port": 8126
+    },
+    {
+      "name": "compression-service",
+      "language": "rust",
+      "port": 8127
+    }
+  ]
+}
