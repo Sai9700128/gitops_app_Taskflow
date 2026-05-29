@@ -3,6 +3,12 @@ name: CI Build
 on:
   push:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      build_all:
+        description: "Build all services"
+        type: boolean
+        default: false
 
 env:
   AWS_REGION: us-east-1
@@ -23,14 +29,24 @@ jobs:
       - name: Detect changed services
         id: set-matrix
         run: |
-          CHANGED=$(git diff --name-only HEAD~1 | grep '/' | cut -d'/' -f1 | sort -u)
-
-          SERVICES=()
-          for dir in $CHANGED; do
-            if [ -f "$dir/Dockerfile" ]; then
-              SERVICES+=("$dir")
-            fi
-          done
+          if [ "${{ github.event.inputs.build_all }}" == "true" ]; then
+            echo "Building all services..."
+            SERVICES=()
+            for dir in */; do
+              dir="${dir%/}"
+              if [ -f "$dir/Dockerfile" ]; then
+                SERVICES+=("$dir")
+              fi
+            done
+          else
+            CHANGED=$(git diff --name-only HEAD~1 | grep '/' | cut -d'/' -f1 | sort -u)
+            SERVICES=()
+            for dir in $CHANGED; do
+              if [ -f "$dir/Dockerfile" ]; then
+                SERVICES+=("$dir")
+              fi
+            done
+          fi
 
           if [ ${#SERVICES[@]} -eq 0 ]; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
@@ -41,7 +57,7 @@ jobs:
             echo "matrix=$JSON" >> $GITHUB_OUTPUT
           fi
 
-          echo "Changed services: ${SERVICES[*]}"
+          echo "Services to build: ${SERVICES[*]}"
 
   # Job 2: Build Docker image, push to ECR & update GitOps repo
   build-and-push:
